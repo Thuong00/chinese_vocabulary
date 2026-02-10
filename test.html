@@ -224,7 +224,14 @@
 
     function extractImageUrl(cellValue) {
         if (!cellValue) return '';
-        // Bắt =IMAGE("url") hoặc IMAGE("url")
+
+        // nếu là object (Google Sheet format)
+        if (typeof cellValue === 'object') {
+            cellValue = cellValue.v || cellValue.f || '';
+        }
+
+        if (typeof cellValue !== 'string') return '';
+
         const match = cellValue.match(/IMAGE\("([^"]+)"\)/i);
         return match ? match[1] : cellValue.trim();
     }
@@ -286,8 +293,8 @@
                     </div>
                     <img class="mnemonic-img"
                          loading="lazy"
-                         src="${extractImageUrl(item['Ảnh minh họa đã chọn']) || 'https://placehold.co/150x150?text=No+Image'}"
-                         onerror="this.onerror=null;this.src='https://placehold.co/150x150?text=No+Image'">
+                         src="${extractImageUrl(item['Ảnh minh họa đã chọn']) || 'https://i.postimg.cc/d3VVgr6y/image.png'}"
+                         onerror="this.onerror=null;this.src='https://i.postimg.cc/d3VVgr6y/image.png'">
                 </div>
 
                 <div class="section-title">✍️ Thứ tự nét viết
@@ -415,6 +422,7 @@
 </script>
 </body>
 </html>
+
 
 
 
