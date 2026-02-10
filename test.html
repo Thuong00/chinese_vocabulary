@@ -28,7 +28,7 @@
             overflow-y: scroll;
             scroll-snap-type: y mandatory;
             /* scroll-behavior: smooth; */
-            scroll-behavior: auto; 
+            scroll-behavior: auto !important;
             -webkit-overflow-scrolling: touch; /* Giúp cuộn mượt hơn trên iOS/Android */
         }
 
@@ -187,7 +187,7 @@
                  /* Thêm dòng này để nút bấm nhạy hơn trên Android */
                 touch-action: manipulation; 
                 cursor: pointer;
-                padding: 10px; /* Tăng diện tích bấm */}
+                padding: 15px; /* Tăng diện tích bấm */}
         .dots { display: flex; gap: 6px; }
         .dot { width: 8px; height: 8px; background: #ddd; border-radius: 50%; transition: 0.3s; }
         .dot.active { background: var(--primary); width: 22px; border-radius: 10px; }
@@ -399,11 +399,39 @@
         }
     }
 
+    let isScrolling = false; // Biến khóa bảo vệ
+
     function goToIndex(index) {
+        if (isScrolling) return; // Nếu đang cuộn thì không nhận lệnh mới
+    
+        isScrolling = true;
         currentIndex = index;
-        document.getElementById(`card-${index}`)
-            .scrollIntoView({ behavior: 'smooth', block: 'start' });
-        updateDots(index);
+    
+        const targetCard = document.getElementById(`card-${index}`);
+        if (targetCard) {
+            // Thực hiện cuộn mượt bằng JS thay vì CSS
+            targetCard.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+
+            // Sau 500ms (thời gian hiệu ứng lật trang) mới cho phép bấm tiếp
+            setTimeout(() => {
+                isScrolling = false;
+            }, 500);
+        }
+    }
+
+    function nextPage() {
+        if (currentIndex < totalItems - 1) {
+            goToIndex(currentIndex + 1);
+        }
+    }
+
+    function prevPage() {
+        if (currentIndex > 0) {
+            goToIndex(currentIndex - 1);
+        }
     }
     
     function createDots(count) {
@@ -428,39 +456,6 @@
             dot.classList.toggle('active', i === (index % dots.length));
         });
     }
- 
-    function nextPage() {
-        // if (currentIndex < totalItems - 1) {
-        //     currentIndex++;
-        //     document.getElementById(`card-${currentIndex}`).scrollIntoView();
-        // }
-        if (currentIndex < totalItems - 1) {
-            currentIndex++;
-            const targetCard = document.getElementById(`card-${currentIndex}`);
-        
-            // Cách 1: Dùng scrollIntoView với behavior cụ thể
-            targetCard.scrollIntoView({ 
-                behavior: 'smooth', // Bạn có thể đổi thành 'auto' để test độ nhạy
-                block: 'start' 
-            });
-        }
-    }
-
-    function prevPage() {
-        // if (currentIndex > 0) {
-        //     currentIndex--;
-        //     document.getElementById(`card-${currentIndex}`).scrollIntoView();
-        // }
-        if (currentIndex > 0) {
-            currentIndex--;
-            const targetCard = document.getElementById(`card-${currentIndex}`);
-        
-            targetCard.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
-            });
-        }
-    }
 
     function speak(text) {
         const utter = new SpeechSynthesisUtterance(text);
@@ -474,13 +469,16 @@
         return document.querySelectorAll('.flashcard');
     }
 
+    // Cập nhật sự kiện scroll để không bị nhảy dots khi đang bấm nút
     book.addEventListener('scroll', () => {
-        const scrollTop = book.scrollTop;
+        if (isScrolling) return; // Nếu đang dùng nút bấm thì không tự tính toán lại vị trí
 
+        const scrollTop = book.scrollTop;
         let closestIndex = 0;
         let minDiff = Infinity;
 
-        getCards().forEach((card, i) => {
+        const cards = document.querySelectorAll('.flashcard');
+        cards.forEach((card, i) => {
             const diff = Math.abs(card.offsetTop - scrollTop);
             if (diff < minDiff) {
                 minDiff = diff;
@@ -493,8 +491,10 @@
             updateDots(currentIndex);
         }
     });
+    
     init();
 </script>
 </body>
 </html>
+
 
