@@ -110,9 +110,57 @@
             background: none; border: 1px solid #ccc; padding: 5px 10px; border-radius: 5px; cursor: pointer;
         }
 
+        .nav-control {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
+
+.nav-control button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+}
+
+.dots-container {
+    display: flex;
+    gap: 8px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    background: #ccc;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.dot.active {
+    background: #00a86b; /* Màu xanh giống mẫu */
+    width: 20px; /* Kéo dài chấm đang chọn */
+    border-radius: 10px;
+}
+
         #status { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); }
     </style>
 </head>
+
+<div class="nav-control">
+    <button onclick="prevPage()">←</button>
+    <div id="pageDots" class="dots-container"></div>
+    <button onclick="nextPage()">→</button>
+</div>
 <body>
 
 <div id="status">Đang tải dữ liệu...</div>
@@ -180,7 +228,67 @@
         utter.lang = 'zh-CN';
         window.speechSynthesis.speak(utter);
     }
+
+    let currentIndex = 0;
+
+function render(data) {
+    const book = document.getElementById('book');
+    // ... code render các flashcard cũ của bạn ...
+    
+    // Sau khi render xong, tạo các chấm tròn điều hướng
+    createDots(data.length);
+    updateActiveDot();
+}
+
+function createDots(count) {
+    const container = document.getElementById('pageDots');
+    container.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i === 0 ? ' active' : '');
+        container.appendChild(dot);
+    }
+}
+
+function updateActiveDot() {
+    const dots = document.querySelectorAll('.dot');
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentIndex);
+    });
+}
+
+function nextPage() {
+    const cards = document.querySelectorAll('.flashcard');
+    if (currentIndex < cards.length - 1) {
+        currentIndex++;
+        scrollToCard();
+    }
+}
+
+function prevPage() {
+    if (currentIndex > 0) {
+        currentIndex--;
+        scrollToCard();
+    }
+}
+
+function scrollToCard() {
+    const cards = document.querySelectorAll('.flashcard');
+    cards[currentIndex].scrollIntoView({ behavior: 'smooth' });
+    updateActiveDot();
+}
+
+// Lắng nghe sự kiện cuộn thủ công để cập nhật nút chấm tròn
+document.getElementById('book').addEventListener('scroll', () => {
+    const container = document.getElementById('book');
+    const index = Math.round(container.scrollTop / window.innerHeight);
+    if (index !== currentIndex) {
+        currentIndex = index;
+        updateActiveDot();
+    }
+});
 </script>
 
 </body>
 </html>
+
