@@ -221,6 +221,14 @@
         if (!text) return '';
         return text.replace(/\\n/g, '<br>');
     }
+
+    function extractImageUrl(cellValue) {
+        if (!cellValue) return '';
+        // Bắt =IMAGE("url") hoặc IMAGE("url")
+        const match = cellValue.match(/IMAGE\("([^"]+)"\)/i);
+        return match ? match[1] : cellValue.trim();
+    }
+
     function render(data) {
         const book = document.getElementById('book');
         book.innerHTML = data.map((item, index) => {
@@ -319,14 +327,6 @@
             });
     }
 
-    function extractImageUrl(cellValue) {
-        if (!cellValue) return '';
-
-        // match =IMAGE("url")
-        const match = cellValue.match(/IMAGE\("([^"]+)"\)/i);
-        return match ? match[1] : cellValue;
-    }
-    
     function lazyLoadSVG() {
         const imgs = document.querySelectorAll('img[data-src]');
 
@@ -412,6 +412,7 @@
 </script>
 </body>
 </html>
+
 
 
 
