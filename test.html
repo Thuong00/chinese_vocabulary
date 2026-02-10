@@ -174,7 +174,13 @@
             color: #555;
             margin-top: 2px;
         }
-        
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 24px;
+            font-style: italic;
+        }
         .nav-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #333; }
         .dots { display: flex; gap: 6px; }
         .dot { width: 8px; height: 8px; background: #ddd; border-radius: 50%; transition: 0.3s; }
@@ -209,13 +215,18 @@
             skipEmptyLines: true,
             complete: function(results) {
                 const container = document.getElementById('card-container');
-                
-                const data = results.data.filter(item => 
-                    item['Status'] && item['Status'].trim() === 'Ready'
+                const loading = document.getElementById('loading');
+
+                loading.style.display = 'none';
+
+                // 🔹 Lọc Ready SAU KHI parse xong
+                const data = results.data.filter(item =>
+                    item['Status']?.trim() === 'Ready'
                 );
+
                 if (data.length === 0) {
                     container.innerHTML = `
-                        <div id="loading">
+                        <div class="empty-state">
                             Hiện không có từ nào đã sẵn sàng để học
                         </div>
                     `;
@@ -226,7 +237,6 @@
                 render(data);
                 createDots(totalItems);
                 lazyLoadSVG();
-                document.getElementById('loading').style.display = 'none';
             }
         });
     }
@@ -422,6 +432,7 @@
 </script>
 </body>
 </html>
+
 
 
 
