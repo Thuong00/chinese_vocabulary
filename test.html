@@ -26,10 +26,7 @@
         #book {
             height: 100svh;             
             height: 100dvh;              /* fallback cho browser mới */
-            position: relative;
-            z-index: 1;
-            overflow-y: auto;
-            /* overflow-y: scroll; */
+            overflow-y: scroll;
             scroll-snap-type: y mandatory;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -143,7 +140,6 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            pointer-events: auto;
             background: white;
             padding: 10px 20px;
             border-radius: 40px;
@@ -151,6 +147,7 @@
             align-items: center;
             gap: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 9999;
         }
 
         .ext-vocab-item {
@@ -405,6 +402,7 @@
         isProgrammaticScroll = true;
 
         const book = document.getElementById('book');
+        book.style.scrollSnapType = 'none';
 
         document.getElementById(`card-${index}`)
             .scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -490,19 +488,3 @@
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
