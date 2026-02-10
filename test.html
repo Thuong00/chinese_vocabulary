@@ -53,13 +53,7 @@
             align-items: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
-
-        .component-box strong, 
-        .component-box div, 
-        .mnemonic-text, 
-        .extension-box {
-            white-space: pre-line;
-        }
+        
         .big-char { font-size: 80px; font-weight: bold; margin: 0; line-height: 1; }
         .info-top { text-align: right; flex: 1; }
         .pinyin-box { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
@@ -174,7 +168,6 @@
 </div>
 
 <script>
-    // 1. Dán Link CSV của bạn vào đây
     const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZTDVNcUri3PK3TkRuafajK9Vj8pyPKF79H6JYCzu1l56OM-xbgO7bWdcR84o_FJ8FUXuNe0ALyd7r/pub?output=csv';
 
     let currentIndex = 0;
@@ -196,6 +189,10 @@
         });
     }
 
+    function nl2br(text) {
+        if (!text) return '';
+        return text.replace(/\n/g, '<br>');
+    }
     function render(data) {
         const book = document.getElementById('book');
         book.innerHTML = data.map((item, index) => {
@@ -224,8 +221,10 @@
 
                 <div class="section-title">👣 Thành phần cấu tạo (Bộ thủ)</div>
                 <div class="component-box">
-                    <strong>${item['Thành phần cấu tạo (Bộ thủ)'] || ''}</strong>
-                    <div>${item['Phân tích kỹ hơn cấu tạo'] || ''}</div>
+                    <strong>${nl2br(item['Thành phần cấu tạo (Bộ thủ)'])}</strong>
+                    <div style="font-size:13px; color:#666; margin-top:5px;">
+                        ${nl2br(item['Phân tích kỹ hơn cấu tạo'])|| ''}
+                    </div>
                 </div>
  
                 <div class="total-strokes">TỔNG CỘNG: ${item['Tổng số nét'] || '0'} NÉT</div>
@@ -340,5 +339,6 @@
 </script>
 </body>
 </html>
+
 
 
