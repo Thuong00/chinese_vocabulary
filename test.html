@@ -207,7 +207,13 @@
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-                const data = results.data;
+                const data = results.data.filter(item => 
+                    item['Status'] && item['Status'].trim() === 'Ready'
+                );
+                if (data.length === 0) {
+                    container.innerHTML = '<p>Hiện không có từ nào đã sẵn sàng để học</p>';
+                    return;
+                }
                 totalItems = data.length;
                 render(data);
                 createDots(totalItems);
@@ -220,20 +226,6 @@
     function nl2br(text) {
         if (!text) return '';
         return text.replace(/\\n/g, '<br>');
-    }
-
-    function extractImageUrl(cellValue) {
-        if (!cellValue) return '';
-
-        // nếu là object (Google Sheet format)
-        if (typeof cellValue === 'object') {
-            cellValue = cellValue.v || cellValue.f || '';
-        }
-
-        if (typeof cellValue !== 'string') return '';
-
-        const match = cellValue.match(/IMAGE\("([^"]+)"\)/i);
-        return match ? match[1] : cellValue.trim();
     }
 
     function render(data) {
@@ -293,7 +285,7 @@
                     </div>
                     <img class="mnemonic-img"
                          loading="lazy"
-                         src="${extractImageUrl(item['Ảnh minh họa đã chọn']) || 'https://i.postimg.cc/d3VVgr6y/image.png'}"
+                         src="${item['Ảnh minh họa đã chọn'] || 'https://i.postimg.cc/d3VVgr6y/image.png'}"
                          onerror="this.onerror=null;this.src='https://i.postimg.cc/d3VVgr6y/image.png'">
                 </div>
 
@@ -422,6 +414,7 @@
 </script>
 </body>
 </html>
+
 
 
 
