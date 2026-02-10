@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Từ Điển Hán Ngữ Thông Minh</title>
+    <title>Từ Điển Hán Ngữ Flashcard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root {
@@ -18,10 +18,9 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            overflow: hidden; /* Ngăn cuộn trang chính để dùng scroll-snap */
+            overflow: hidden;
         }
 
-        /* Container chính chứa các trang */
         #book {
             height: 100vh;
             overflow-y: scroll;
@@ -34,14 +33,14 @@
             min-height: 100vh;
             width: 100%;
             padding: 20px;
-            padding-bottom: 100px; /* Chừa chỗ cho thanh điều hướng */
+            padding-bottom: 120px; 
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
 
-        /* Header: Giống ảnh mẫu */
+        /* Header: Khu vực chữ chính */
         .header-section {
             background: white;
             border: 2px solid var(--primary);
@@ -53,24 +52,25 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
-        .big-char { font-size: 90px; font-weight: bold; margin: 0; line-height: 1; }
+        .big-char { font-size: 80px; font-weight: bold; margin: 0; line-height: 1; }
         .info-top { text-align: right; flex: 1; }
-        .pinyin-box { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-bottom: 5px; }
-        .pinyin-tag { background: #34495e; color: white; padding: 2px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-        .pinyin-text { font-size: 26px; color: var(--primary); font-weight: bold; }
-        .han-viet { font-size: 22px; color: var(--secondary); font-weight: bold; margin: 5px 0; }
-        .meaning-small { font-size: 14px; color: #666; margin: 2px 0; }
+        .pinyin-box { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+        .pinyin-tag { background: #34495e; color: white; padding: 2px 10px; border-radius: 10px; font-size: 11px; }
+        .pinyin-text { font-size: 24px; color: var(--primary); font-weight: bold; }
+        .han-viet { font-size: 20px; color: var(--secondary); font-weight: bold; margin: 5px 0; }
+        .meaning-small { font-size: 13px; color: #666; margin: 2px 0; }
 
-        /* Thành phần cấu tạo */
+        /* Tiêu đề các mục */
         .section-title {
             display: flex;
             align-items: center;
             gap: 8px;
             font-weight: bold;
             color: var(--secondary);
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
+        /* Cấu tạo bộ thủ */
         .component-box {
             background: white;
             border-left: 6px solid #ff9f43;
@@ -83,10 +83,10 @@
             background: #e1f5fe;
             color: var(--primary);
             text-align: center;
-            padding: 12px;
-            border-radius: 12px;
+            padding: 10px;
+            border-radius: 10px;
             font-weight: bold;
-            letter-spacing: 1px;
+            font-size: 14px;
         }
 
         /* Mẹo nhớ & Ảnh */
@@ -100,72 +100,63 @@
             background: #fff9db;
             padding: 15px;
             border-radius: 15px;
-            font-size: 14px;
+            font-size: 13px;
             line-height: 1.5;
-            position: relative;
         }
 
         .mnemonic-img {
             width: 100%;
-            height: 150px;
+            height: 120px;
             object-fit: cover;
             border-radius: 15px;
-            background: #ddd;
+            background: #eee;
         }
 
-        /* GIF Thứ tự nét */
-        .gif-container {
-            text-align: center;
+        /* Lưới hiển thị SVG thứ tự nét (2 cột) */
+        .stroke-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
             background: white;
-            padding: 15px;
-            border-radius: 20px;
+            padding: 10px;
+            border-radius: 15px;
         }
-        .gif-img { width: 120px; height: 120px; }
 
-        /* Thanh điều hướng (Slider Control) */
+        .stroke-item {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: contain;
+            border: 1px solid #f9f9f9;
+        }
+
+        /* Thanh điều hướng Slider */
         .nav-control {
             position: fixed;
-            bottom: 25px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 12px 25px;
+            background: white;
+            padding: 10px 20px;
             border-radius: 40px;
             display: flex;
             align-items: center;
-            gap: 20px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            gap: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             z-index: 9999;
         }
 
-        .nav-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #333;
-            padding: 0 10px;
-        }
+        .nav-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #333; }
+        .dots { display: flex; gap: 6px; }
+        .dot { width: 8px; height: 8px; background: #ddd; border-radius: 50%; transition: 0.3s; }
+        .dot.active { background: var(--primary); width: 22px; border-radius: 10px; }
 
-        .dots { display: flex; gap: 8px; align-items: center; }
-        .dot { width: 8px; height: 8px; background: #ccd1d1; border-radius: 50%; transition: 0.4s; }
-        .dot.active { background: var(--primary); width: 25px; border-radius: 10px; }
-
-        /* Nút âm thanh */
-        .speak-btn {
-            background: none; border: 1px solid #ddd; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;
-        }
-
-        #loading-screen {
-            position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 10000;
-        }
+        .speak-btn { background: none; border: 1px solid #eee; border-radius: 50%; cursor: pointer; }
+        #loading { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 10000; }
     </style>
 </head>
 <body>
 
-<div id="loading-screen">Đang tải 100 trang từ vựng...</div>
-
+<div id="loading">Đang tải dữ liệu...</div>
 <div id="book"></div>
 
 <div class="nav-control">
@@ -175,7 +166,7 @@
 </div>
 
 <script>
-    // 1. DÁN LINK CSV CỦA BẠN VÀO ĐÂY
+    // 1. Dán Link CSV của bạn vào đây
     const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZTDVNcUri3PK3TkRuafajK9Vj8pyPKF79H6JYCzu1l56OM-xbgO7bWdcR84o_FJ8FUXuNe0ALyd7r/pub?output=csv';
 
     let currentIndex = 0;
@@ -187,70 +178,76 @@
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-                render(results.data);
-                totalItems = results.data.length;
+                const data = results.data;
+                totalItems = data.length;
+                render(data);
                 createDots(totalItems);
-                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('loading').style.display = 'none';
             }
         });
     }
 
     function render(data) {
         const book = document.getElementById('book');
-        book.innerHTML = data.map((item, index) => `
+        book.innerHTML = data.map((item, index) => {
+            
+            // Xử lý tách link SVG (Thứ tự nét)
+            const strokeLinks = item['GIF Thứ tự nét'] ? item['GIF Thứ tự nét'].split(', ') : [];
+            const strokesHtml = strokeLinks.length > 0 
+                ? strokeLinks.map(link => `<img class="stroke-item" src="${link.trim()}">`).join('')
+                : '<p style="grid-column: span 2; font-size:12px; color:#999; text-align:center;">Đang cập nhật...</p>';
+
+            return `
             <div class="flashcard" id="card-${index}">
                 <div class="header-section">
-                    <h1 class="big-char">${item['Từ tiếng Trung'] || ''}</h1>
+                    <h1 class="big-char">${item['Từ tiếng Trung'] || '？'}</h1>
                     <div class="info-top">
                         <div class="pinyin-box">
-                            <span class="pinyin-tag">Pinyin:</span>
+                            <span class="pinyin-tag">Pinyin</span>
                             <span class="pinyin-text">${item['Pinyin'] || ''}</span>
                             <button class="speak-btn" onclick="speak('${item['Từ tiếng Trung']}')">🔊</button>
                         </div>
                         <div class="han-viet">Hán Việt: ${item['Nghĩa tiếng Việt'] || ''}</div>
-                        <p class="meaning-small">● Tiếng Việt: ${item['Nghĩa tiếng Việt'] || ''}</p>
+                        <p class="meaning-small">● Việt: ${item['Nghĩa tiếng Việt'] || ''}</p>
                         <p class="meaning-small">● English: ${item['Nghĩa tiếng Anh'] || ''}</p>
                     </div>
                 </div>
 
                 <div class="section-title">👣 Thành phần cấu tạo (Bộ thủ)</div>
                 <div class="component-box">
-                    ${item['Thành phần cấu tạo (Bộ thủ)'] || ''}
-                    <div style="font-size:13px; color:#666; margin-top:8px; line-height:1.4">
-                        ${item['Phân tích kỹ hơn cấu tạo'] || ''}
-                    </div>
+                    <strong>${item['Thành phần cấu tạo (Bộ thủ)'] || ''}</strong>
+                    <div style="font-size:13px; color:#666; margin-top:5px;">${item['Phân tích kỹ hơn cấu tạo'] || ''}</div>
                 </div>
 
                 <div class="total-strokes">TỔNG CỘNG: ${item['Tổng số nét'] || '0'} NÉT</div>
 
                 <div class="mnemonic-grid">
                     <div class="mnemonic-text">
-                        <strong style="color:#f39c12">💡 Mẹo ghi nhớ</strong><br><br>
+                        <strong style="color:#f39c12">💡 Mẹo ghi nhớ</strong><br>
                         ${item['Mẹo nhớ'] || ''}
                     </div>
                     <img class="mnemonic-img" src="${item['Link ảnh minh họa mẹo nhớ'] || 'https://via.placeholder.com/150'}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
                 </div>
 
                 <div class="section-title">✍️ Thứ tự nét viết</div>
-                <div class="gif-container">
-                    <img class="gif-img" src="${item['GIF Thứ tự nét'] || ''}" onerror="this.style.display='none'">
+                <div class="stroke-grid">
+                    ${strokesHtml}
                 </div>
 
                 <div class="section-title">📚 Từ vựng mở rộng</div>
-                <div style="background:white; padding:15px; border-radius:15px; font-size:14px; line-height:1.6">
-                    ${item['Ứng dụng - Từ vựng mở rộng'] || 'Nội dung đang cập nhật...'}
+                <div style="background:white; padding:15px; border-radius:15px; font-size:13px; line-height:1.6">
+                    ${item['Ứng dụng - Từ vựng mở rộng'] || 'Chưa có dữ liệu.'}
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
-    // Điều khiển Navigation
     function createDots(count) {
         const dotsContainer = document.getElementById('pageDots');
         dotsContainer.innerHTML = '';
-        // Giới hạn hiển thị dots nếu quá nhiều trang (ví dụ 100 trang)
-        let displayCount = Math.min(count, 5); 
-        for (let i = 0; i < displayCount; i++) {
+        const limit = Math.min(count, 5); // Chỉ hiện tối đa 5 chấm để tránh tràn màn hình
+        for (let i = 0; i < limit; i++) {
             const dot = document.createElement('div');
             dot.className = 'dot' + (i === 0 ? ' active' : '');
             dotsContainer.appendChild(dot);
@@ -259,6 +256,7 @@
 
     function updateDots(index) {
         const dots = document.querySelectorAll('.dot');
+        if (dots.length === 0) return;
         dots.forEach((dot, i) => {
             dot.classList.toggle('active', i === (index % dots.length));
         });
@@ -268,7 +266,6 @@
         if (currentIndex < totalItems - 1) {
             currentIndex++;
             document.getElementById(`card-${currentIndex}`).scrollIntoView();
-            updateDots(currentIndex);
         }
     }
 
@@ -276,16 +273,13 @@
         if (currentIndex > 0) {
             currentIndex--;
             document.getElementById(`card-${currentIndex}`).scrollIntoView();
-            updateDots(currentIndex);
         }
     }
 
-    // Theo dõi sự kiện cuộn để cập nhật dots
     document.getElementById('book').addEventListener('scroll', () => {
-        const scrollPos = document.getElementById('book').scrollTop;
-        const newIndex = Math.round(scrollPos / window.innerHeight);
-        if (newIndex !== currentIndex) {
-            currentIndex = newIndex;
+        const index = Math.round(document.getElementById('book').scrollTop / window.innerHeight);
+        if (index !== currentIndex) {
+            currentIndex = index;
             updateDots(currentIndex);
         }
     });
@@ -300,4 +294,3 @@
 </script>
 </body>
 </html>
-
