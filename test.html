@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Tiếng Trung - Database Sheets</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; padding: 15px; margin: 0; }
+        .card { background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .hanzi { font-size: 2.5em; color: #e74c3c; }
+        .label { font-weight: bold; color: #555; font-size: 0.8em; margin-top: 8px; display: block; }
+        .search-container { position: sticky; top: 0; background: #f0f2f5; padding: 10px 0; z-index: 10; }
+        input { width: 100%; padding: 12px; border-radius: 20px; border: 1px solid #ddd; box-sizing: border-box; }
+        #status { text-align: center; color: #666; padding: 20px; }
+        img { max-width: 100%; border-radius: 5px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="search-container">
+    <input type="text" id="search" placeholder="Tìm kiếm từ vựng..." onkeyup="search()">
+</div>
+
+<div id="status">Đang nạp dữ liệu từ Google...</div>
+<div id="list"></div>
+
+<script>
+    // 1. THAY LINK CSV CỦA BẠN VÀO ĐÂY
+    const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRZTDVNcUri3PK3TkRuafajK9Vj8pyPKF79H6JYCzu1l56OM-xbgO7bWdcR84o_FJ8FUXuNe0ALyd7r/pub?output=csv';
+
+    let db = [];
+
+    function init() {
+        Papa.parse(sheetUrl, {
+            download: true,
+            header: true, // Tự động lấy dòng đầu làm tên cột
+            skipEmptyLines: true,
+            complete: function(results) {
+                console.log("Dữ liệu tải về:", results.data);
+                db = results.data;
+                render(db);
+                document.getElementById('status').style.display = 'none';
+            },
+            error: function(err) {
+                document.getElementById('status').innerHTML = 
+                    "<b style='color:red'>LỖI KẾT NỐI:</b><br>Trình duyệt chặn file cục bộ hoặc link sai.<br><br>" +
+                    "Hãy thử: <b>Tải file này lên Tiiny.host</b> để chạy!";
+            }
+        });
+    }
+
+    function render(data) {
+        const container = document.getElementById('list');
+        // Lưu ý: Tên các cột (item.Status, item.Pinyin...) phải khớp 100% với tên cột trên Google Sheets của bạn
+        container.innerHTML = data.map(item => `
+            <div class="card">
+                <div style="float:right; font-size:12px; color:gray">${item['Status'] || ''}</div>
+                <div class="hanzi">${item['Từ tiếng Trung'] || ''}</div>
+                <div><b>${item['Pinyin'] || ''}</b></div>
+                
+                <span class="label">Nghĩa:</span>
+                <div>VI: ${item['Nghĩa tiếng Việt'] || ''} | EN: ${item['Nghĩa tiếng Anh'] || ''}</div>
+                
+                <span class="label">Cấu tạo & Bộ thủ:</span>
+                <div>${item['Thành phần cấu tạo (Bộ thủ)'] || ''} - ${item['Phân tích kỹ hơn cấu tạo'] || ''}</div>
+
+                <span class="label">Mẹo nhớ:</span>
+                <div>${item['Mẹo nhớ'] || ''}</div>
+                
+                ${item['Link ảnh minh họa mẹo nhớ'] ? `<img src="${item['Link ảnh minh họa mẹo nhớ']}">` : ''}
+                
+                <button onclick="speak('${item['Từ tiếng Trung']}')" style="margin-top:10px">🔊 Nghe</button>
+            </div>
+        `).join('');
+    }
+
+    function speak(text) {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'zh-CN';
+        window.speechSynthesis.speak(utter);
+    }
+
+    function search() {
+        const query = document.getElementById('search').value.toLowerCase();
+        const filtered = db.filter(i => 
+            Object.values(i).some(val => String(val).toLowerCase().includes(query))
+        );
+        render(filtered);
+    }
+
+    init();
+</script>
+</body>
+</html>
