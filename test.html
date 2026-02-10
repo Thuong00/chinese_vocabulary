@@ -276,7 +276,7 @@
                         <strong style="color:#f39c12">💡 Mẹo ghi nhớ</strong><br>
                         ${nl2br(item['Mẹo nhớ']) || ''}
                     </div>
-                    <img class="mnemonic-img" src="${item['Link ảnh minh họa mẹo nhớ'] || 'https://via.placeholder.com/150'}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+                    <img class="mnemonic-img" src="${extractImageUrl(item['Ảnh minh họa đã chọn']) || 'https://via.placeholder.com/150'}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
                 </div>
 
                 <div class="section-title">✍️ Thứ tự nét viết
@@ -317,7 +317,15 @@
                     vi: parts[2] || ''
                 };
             });
-}
+    }
+
+    function extractImageUrl(cellValue) {
+        if (!cellValue) return '';
+
+        // match =IMAGE("url")
+        const match = cellValue.match(/IMAGE\("([^"]+)"\)/i);
+        return match ? match[1] : cellValue;
+    }
     
     function lazyLoadSVG() {
         const imgs = document.querySelectorAll('img[data-src]');
@@ -404,6 +412,7 @@
 </script>
 </body>
 </html>
+
 
 
 
