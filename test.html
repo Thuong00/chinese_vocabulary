@@ -27,7 +27,9 @@
             height: 100vh;
             overflow-y: scroll;
             scroll-snap-type: y mandatory;
-            scroll-behavior: smooth;
+            /* scroll-behavior: smooth; */
+            scroll-behavior: auto; 
+            -webkit-overflow-scrolling: touch; /* Giúp cuộn mượt hơn trên iOS/Android */
         }
 
         .flashcard {
@@ -181,7 +183,11 @@
             padding: 24px;
             font-style: italic;
         }
-        .nav-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #333; }
+        .nav-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #333; 
+                 /* Thêm dòng này để nút bấm nhạy hơn trên Android */
+                touch-action: manipulation; 
+                cursor: pointer;
+                padding: 10px; /* Tăng diện tích bấm */}
         .dots { display: flex; gap: 6px; }
         .dot { width: 8px; height: 8px; background: #ddd; border-radius: 50%; transition: 0.3s; }
         .dot.active { background: var(--primary); width: 22px; border-radius: 10px; }
@@ -422,18 +428,37 @@
             dot.classList.toggle('active', i === (index % dots.length));
         });
     }
-
+ 
     function nextPage() {
+        // if (currentIndex < totalItems - 1) {
+        //     currentIndex++;
+        //     document.getElementById(`card-${currentIndex}`).scrollIntoView();
+        // }
         if (currentIndex < totalItems - 1) {
             currentIndex++;
-            document.getElementById(`card-${currentIndex}`).scrollIntoView();
+            const targetCard = document.getElementById(`card-${currentIndex}`);
+        
+            // Cách 1: Dùng scrollIntoView với behavior cụ thể
+            targetCard.scrollIntoView({ 
+                behavior: 'smooth', // Bạn có thể đổi thành 'auto' để test độ nhạy
+                block: 'start' 
+            });
         }
     }
 
     function prevPage() {
+        // if (currentIndex > 0) {
+        //     currentIndex--;
+        //     document.getElementById(`card-${currentIndex}`).scrollIntoView();
+        // }
         if (currentIndex > 0) {
             currentIndex--;
-            document.getElementById(`card-${currentIndex}`).scrollIntoView();
+            const targetCard = document.getElementById(`card-${currentIndex}`);
+        
+            targetCard.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
         }
     }
 
@@ -472,3 +497,4 @@
 </script>
 </body>
 </html>
+
