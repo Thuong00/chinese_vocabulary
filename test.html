@@ -205,7 +205,7 @@
                 </div>
 
                 <div class="section-title">✍️ Thứ tự nét viết
-                    <button class="nav-btn" style="font-size:14px; color:var(--primary);" onpointerdown="resetStrokes()">🔄 Replay</button>
+                    <button class="nav-btn" style="font-size:14px" onclick="renderCard(${index})">🔄 Replay</button>
                 </div>
                 
                 <div class="stroke-grid">${strokesHtml}</div>
@@ -218,30 +218,6 @@
         updateDots();
     }
 
-    function resetStrokes() {
-        // Tìm grid của card hiện tại đang hiển thị
-        const grid = document.querySelector('.stroke-grid');
-        if (!grid) return;
-
-        // Lấy tất cả ảnh nét vẽ
-        const imgs = grid.querySelectorAll('img.stroke-item');
-
-        imgs.forEach(img => {
-            // Lấy URL gốc (loại bỏ các tham số ?t= cũ nếu có)
-            const originalSrc = img.src.split('?')[0];
-        
-            // 1. Xóa src để giải phóng RAM và dừng animation cũ
-            img.src = ""; 
-
-            // 2. Sử dụng requestAnimationFrame để đảm bảo trình duyệt 
-            // đã thực sự xóa ảnh cũ trước khi nạp lại ảnh mới
-            requestAnimationFrame(() => {
-                // Thêm timestamp để ép trình duyệt chạy lại animation từ đầu
-                img.src = originalSrc + '?t=' + Date.now();
-            });
-        });
-    }
-    
     function nextPage() {
         if (currentIndex < totalItems - 1) {
             currentIndex++;
@@ -297,6 +273,7 @@
 </script>
 </body>
 </html>
+
 
 
 
