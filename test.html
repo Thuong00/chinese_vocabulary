@@ -182,12 +182,16 @@
                         </div>
                         <div class="han-viet">Hán Việt: ${item['Nghĩa Hán Việt'] || ''}</div>
                         <p class="meaning-small">● Việt: ${item['Nghĩa tiếng Việt'] || ''}</p>
+                        <p class="meaning-small">● English: ${item['Nghĩa tiếng Anh'] || ''}</p>
                     </div>
                 </div>
 
                 <div class="section-title">👣 Thành phần cấu tạo</div>
                 <div class="component-box">
                     <strong>${nl2br(item['Thành phần cấu tạo (Bộ thủ)'])}</strong>
+                    <div style="font-size:13px; color:#666; margin-top:5px;">
+                        ${nl2br(item['Phân tích kỹ hơn cấu tạo'])|| ''}
+                    </div>
                 </div>
  
                 <div class="total-strokes">TỔNG CỘNG: ${item['Tổng số nét'] || '0'} NÉT</div>
@@ -201,7 +205,7 @@
                 </div>
 
                 <div class="section-title">✍️ Thứ tự nét viết 
-                     <button class="nav-btn" style="font-size:14px" onclick="renderCard(${index})">🔄 Replay</button>
+                     <button class="nav-btn" style="font-size:14px" onclick="resetStrokes(${index})">🔄 Replay</button>
                 </div>
                 <div class="stroke-grid">${strokesHtml}</div>
 
@@ -268,3 +272,4 @@
 </script>
 </body>
 </html>
+
