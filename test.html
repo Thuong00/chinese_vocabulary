@@ -207,8 +207,11 @@
                 <div class="section-title">✍️ Thứ tự nét viết 
                      <button class="nav-btn" style="font-size:14px" onclick="resetStrokes(${index})">🔄 Replay</button>
                 </div>
-                <div class="stroke-grid">${strokesHtml}</div>
-
+            
+                <div class="stroke-grid" id="stroke-grid-${index}">
+                        ${strokesHtml}
+                </div>
+                
                 <div class="section-title">📚 Từ vựng mở rộng</div>
                 <div style="background:white; padding:15px; border-radius:15px;">${vocabHtml}</div>
             </div>
@@ -217,6 +220,24 @@
         updateDots();
     }
 
+    function resetStrokes(cardIndex) {
+        const grid = document.getElementById(`stroke-grid-${cardIndex}`);
+        if (!grid) return;
+
+        //CHỈ chọn SVG stroke
+        const imgs = grid.querySelectorAll('img.stroke-item');
+
+        imgs.forEach(img => {
+            const url = img.src;
+            img.removeAttribute('src');
+
+            requestAnimationFrame(() => {
+                // bust cache để SVG chạy lại animation
+                img.src = url.split('?')[0] + '?t=' + Date.now();
+            });
+        });
+    }
+    
     function nextPage() {
         if (currentIndex < totalItems - 1) {
             currentIndex++;
@@ -272,4 +293,5 @@
 </script>
 </body>
 </html>
+
 
