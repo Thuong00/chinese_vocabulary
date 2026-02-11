@@ -205,7 +205,7 @@
                 </div>
 
                 <div class="section-title">✍️ Thứ tự nét viết
-                    <button class="nav-btn" style="font-size:14px" onclick="renderCard(${index})">🔄 Replay</button>
+                    <button class="nav-btn" onpointerdown="resetStrokes()">🔄 Replay</button>
                 </div>
                 
                 <div class="stroke-grid">${strokesHtml}</div>
@@ -218,6 +218,25 @@
         updateDots();
     }
 
+    function resetStrokes() {
+        const grid = document.querySelector('.stroke-grid');
+        if (!grid) return;
+
+        // Nhân bản (clone) toàn bộ grid để xóa sạch trạng thái cũ
+        const newGrid = grid.cloneNode(true);
+    
+        // Thay thế grid cũ bằng bản clone
+        grid.parentNode.replaceChild(newGrid, grid);
+
+        // Một số trình duyệt Android vẫn lì lợm, ta thêm bước ép render lại src
+        const imgs = newGrid.querySelectorAll('img.stroke-item');
+            imgs.forEach(img => {
+                const currentSrc = img.src;
+                img.src = '';
+                img.src = currentSrc; 
+            });
+    }
+    
     function nextPage() {
         if (currentIndex < totalItems - 1) {
             currentIndex++;
@@ -273,6 +292,7 @@
 </script>
 </body>
 </html>
+
 
 
 
