@@ -104,6 +104,11 @@
         .dot.active { background: var(--primary); width: 20px; border-radius: 10px; }
 
         .ext-vocab-item { background: #f9fafb; border: 1px solid #eee; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+        .ext-vocab-item:hover {
+                background-color: #f0f7ff; /* Màu xanh dương cực nhạt */
+                border-left: 3px solid #1E90FF; /* Thanh nhấn màu xanh dương bên trái */
+                border-radius: 8px;
+        }
         .ext-han { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: bold; }
         .ext-pinyin { font-size: 14px; color: var(--primary); }
         .speak-btn { background: none; border: 1px solid #eee; border-radius: 50%; cursor: pointer; }
@@ -186,11 +191,12 @@
         const vocabList = parseExtendedVocab(item['Ứng dụng - Từ vựng mở rộng']);
         const vocabHtml = vocabList.length
             ? vocabList.map(v => `
-                <div class="ext-vocab-item">
-                    <div class="ext-han">${v.han} <button class="speak-btn" onclick="speak('${v.han}')">🔊</button></div>
+                <div class="ext-vocab-item" onclick="speak_all(\`${v.han}\`, \`${v.vi}\`, \`${v.en}\`)"
+                     style="cursor: pointer; transition: background 0.2s;">
+                    <div class="ext-han">${v.han} <button class="speak-btn" onclick="event.stopPropagation(); speak('${v.han}')">🔊</button></div>
                     <div class="ext-pinyin">${v.pinyin}</div>
                     <div class="ext-vi">${v.vi}</div>
-                    <div class="ext-vi">${v.en} <button class="speak-btn" onclick="speak_en('${v.en}')">🔊</button></div>
+                    <div class="ext-vi">${v.en} <button class="speak-btn" onclick="event.stopPropagation(); speak_en('${v.en}')">🔊</button></div>
                 </div>
             `).join('')
             : '<div style="font-size:12px;color:#999">Chưa có dữ liệu.</div>';
@@ -209,7 +215,7 @@
                         <div class="han-viet">Hán Việt: ${item['Nghĩa Hán Việt'] || ''}</div>
                         <p class="meaning-small">● Việt: ${item['Nghĩa tiếng Việt'] || ''}</p>
                         <p class="meaning-small">● English: ${item['Nghĩa tiếng Anh'] || ''}
-                            <button class="speak-btn" onclick="speak_en('${item['Nghĩa tiếng Anh']?.replace(/\//g, ',').replace(/'/g, "\\'") || ''}')">🔊</button>
+                            <button class="speak-btn" onclick="speak_en('${item['Nghĩa tiếng Anh'] || ''}')">🔊</button>
                         </p>
                     </div>
                 </div>
@@ -308,11 +314,58 @@
     }
 
     function speak_en(text) {
-        const utter = new SpeechSynthesisUtterance(text);
+        if (!text) return;
+    
+        // Dừng các yêu cầu nói cũ
+        window.speechSynthesis.cancel();
+
+        // Làm sạch chuỗi: Thay / thành dấu phẩy để nghỉ nhịp, 
+        // và đảm bảo các ký tự đặc biệt không gây lỗi
+        const cleanText = text.replace(/\//g, ',');
+
+        const utter = new SpeechSynthesisUtterance(cleanText);
         utter.lang = 'en-US';
+    
+        // Tùy chỉnh màu xanh dương cho tâm trạng vui vẻ
+        utter.rate = 0.9; // Đọc chậm lại một chút cho rõ
+    
         window.speechSynthesis.speak(utter);
     }
 
+    function speak_all(cn, vi, en) {
+        // Hủy các yêu cầu cũ để tránh bị lag
+        window.speechSynthesis.cancel();
+
+        // 1. Tiếng Trung
+        const utterCN = new SpeechSynthesisUtterance(cn);
+        utterCN.lang = 'zh-CN';
+
+        // 2. Tiếng Việt
+        const utterVI = new SpeechSynthesisUtterance(vi);
+        utterVI.lang = 'vi-VN';
+
+        // 3. Tiếng Anh (Xử lý dấu / như bạn đã làm)
+        const utterEN = new SpeechSynthesisUtterance(en.replace(/\//g, ','));
+        utterEN.lang = 'en-US';
+
+        // Thiết lập thứ tự: Trung xong đến Việt, Việt xong đến Anh
+        // Xử lý trình tự kèm khoảng nghỉ 1000ms (1 giây)
+        utterCN.onend = () => {
+            setTimeout(() => {
+                window.speechSynthesis.speak(utterVI);
+            }, 1000);
+        };
+
+        utterVI.onend = () => {
+            setTimeout(() => {
+                window.speechSynthesis.speak(utterEN);
+            }, 1000);
+        };
+
+        // Bắt đầu phát tiếng Trung đầu tiên
+        window.speechSynthesis.speak(utterCN);;
+    }
+    
     init();
 </script>
 </body>
